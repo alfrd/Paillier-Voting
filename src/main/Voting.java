@@ -19,10 +19,10 @@ public class Voting {
 	private BigInteger mu;
 	
 	
-	public Voting(int pPrime, int qPrime, int gElement, ArrayList<String> encryptedVotes) {
-		p = BigInteger.valueOf(pPrime);
-		q = BigInteger.valueOf(qPrime);
-		g = BigInteger.valueOf(gElement);
+	public Voting(BigInteger pPrime, BigInteger qPrime, BigInteger gElement, ArrayList<String> encryptedVotes) {
+		p = pPrime;
+		q = qPrime;
+		g = gElement;
 		
 		n = p.multiply(q);
 		n2 = n.pow(2);
@@ -37,6 +37,7 @@ public class Voting {
 		//Calculate mu
 		BigInteger mu = g.modPow(lambda, n2);
 		mu = mu.subtract(BigInteger.ONE).divide(n);
+		System.out.println("Efter L-funktion: " + mu);
 		mu = mu.modInverse(n);
 		System.out.println("Mu is: " + mu);
 		//start vote count
@@ -47,6 +48,9 @@ public class Voting {
 		cipherProd = cipherProd.subtract(BigInteger.ONE).divide(n);
 		
 		BigInteger voteResult = cipherProd.multiply(mu).mod(n);
+		if(voteResult.compareTo(BigInteger.valueOf(encryptedVotes.size())) > 0) {
+			voteResult = voteResult.subtract(n);
+		}
 		System.out.println(cipherProd);
 		System.out.println(voteResult);
 	}
@@ -54,13 +58,13 @@ public class Voting {
 	private BigInteger multiplyCiphertexts(ArrayList<String> ciphertexts) {
 		BigInteger cipherProd = BigInteger.ONE;
 		for(String s: ciphertexts) {
-			cipherProd = cipherProd.multiply(BigInteger.valueOf(Integer.valueOf(s)));
+			cipherProd = cipherProd.multiply(new BigInteger(s));
 		}
 		return cipherProd;
 		
 	}
 	public static void main(String args[]) throws IOException {
-		FileInputStream fileStream = new FileInputStream("encryptedvotes.txt");
+		FileInputStream fileStream = new FileInputStream("input42.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(fileStream));
 		String vote;
 		ArrayList<String> votes = new ArrayList<String>();
@@ -73,9 +77,9 @@ public class Voting {
 			e.printStackTrace();
 			System.out.println("There is no file with that name.");
 		}
-		int p = 5;
-		int q = 7;
-		int g = 867;
+		BigInteger p = BigInteger.valueOf(1117);
+		BigInteger q = BigInteger.valueOf(1471);
+		BigInteger g = new BigInteger("652534095028");
 		
 		
 		Voting v = new Voting(p, q, g, votes);
